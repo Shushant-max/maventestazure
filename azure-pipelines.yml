@@ -1,5 +1,4 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
+# Build your Java project and run tests with Apache Maven
 
 trigger:
 - main
@@ -9,17 +8,26 @@ pool:
 
 steps:
 
+# Maven Build
 - task: Maven@4
   inputs:
     mavenPomFile: 'Javateam/pom.xml'
-    goals: 'package'
+    goals: 'clean package'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.11'
 
+# Copy JAR/WAR files to staging directory
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'Javateam/target'
+    Contents: '*.jar'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# Publish Build Artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'Javateam/target'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
